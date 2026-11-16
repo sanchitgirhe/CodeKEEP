@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodeKeep - Competitive Programming DBMS Portal</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono for authentic dev tool look -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              900: '#1e3a8a'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Clean, non-distracting scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white">
+
+  <!-- Top Real-World Navbar -->
+  <header class="sticky top-0 z-40 bg-white border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand & Project Meta -->
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2.5">
+          <div class="h-9 w-9 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold font-mono text-base shadow-sm">
+            CK
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-slate-900 tracking-tight text-lg">CodeKeep</span>
+              <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200 font-medium">MySQL 8.x</span>
+            </div>
+          </div>
+        </div>
+        <div class="hidden md:block h-5 w-px bg-slate-200"></div>
+        <span class="hidden md:inline-block text-xs text-slate-500 font-medium">
+          RDBMS Project Portal • CSC2131
+        </span>
+      </div>
+
+      <!-- Action Area -->
+      <div class="flex items-center gap-3">
+        <button onclick="resetToSqlDefaults()" title="Reset data to original SQL file" class="px-3 py-2 text-xs font-medium text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg transition-colors flex items-center gap-1.5 shadow-sm">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-slate-400"></i>
+          <span>Reset SQL State</span>
+        </button>
+
+        <button onclick="openAddUserModal()" class="px-3.5 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-lg shadow-sm transition-colors flex items-center gap-1.5 cursor-pointer">
+          <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+          <span>Banda Add Karein</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- KPI Metric Cards (Clean, bright, non-glowing) -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex items-center justify-between">
+        <div>
+          <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Registered Users</p>
+          <h3 id="stat-user-count" class="text-2xl font-bold text-slate-900 mt-1 font-mono">3</h3>
+          <span class="text-[11px] text-emerald-600 font-medium flex items-center gap-1 mt-1">
+            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Live Table: USER
+          </span>
+        </div>
+        <div class="h-10 w-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
+          <i data-lucide="users" class="w-5 h-5"></i>
+        </div>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex items-center justify-between">
+        <div>
+          <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Indexed Contests</p>
+          <h3 id="stat-contest-count" class="text-2xl font-bold text-slate-900 mt-1 font-mono">3</h3>
+          <span class="text-[11px] text-slate-500 font-medium block mt-1">Table: CONTEST</span>
+        </div>
+        <div class="h-10 w-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100">
+          <i data-lucide="trophy" class="w-5 h-5"></i>
+        </div>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex items-center justify-between">
+        <div>
+          <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Mapped Problems</p>
+          <h3 id="stat-problem-count" class="text-2xl font-bold text-slate-900 mt-1 font-mono">4</h3>
+          <span class="text-[11px] text-slate-500 font-medium block mt-1">Table: PROBLEM</span>
+        </div>
+        <div class="h-10 w-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+          <i data-lucide="code-2" class="w-5 h-5"></i>
+        </div>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex items-center justify-between">
+        <div>
+          <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Participations</p>
+          <h3 id="stat-part-count" class="text-2xl font-bold text-slate-900 mt-1 font-mono">4</h3>
+          <span class="text-[11px] text-slate-500 font-medium block mt-1">Table: PARTICIPATES</span>
+        </div>
+        <div class="h-10 w-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center border border-purple-100">
+          <i data-lucide="activity" class="w-5 h-5"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Realistic App Navigation Tabs -->
+    <div class="flex items-center gap-2 border-b border-slate-200 pb-px text-sm">
+      <button onclick="switchTab('users')" id="tab-btn-users" class="tab-button font-medium px-4 py-2.5 border-b-2 border-blue-600 text-blue-600 flex items-center gap-2">
+        <i data-lucide="users" class="w-4 h-4"></i>
+        <span>Users Directory (Bande)</span>
+      </button>
+      <button onclick="switchTab('contests')" id="tab-btn-contests" class="tab-button font-medium px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2">
+        <i data-lucide="calendar" class="w-4 h-4"></i>
+        <span>Contests & Problems</span>
+      </button>
+      <button onclick="switchTab('leaderboard')" id="tab-btn-leaderboard" class="tab-button font-medium px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2">
+        <i data-lucide="medal" class="w-4 h-4"></i>
+        <span>Participations & Scores</span>
+      </button>
+      <button onclick="switchTab('dbviewer')" id="tab-btn-dbviewer" class="tab-button font-medium px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2">
+        <i data-lucide="database" class="w-4 h-4"></i>
+        <span>Raw SQL Relational Schema</span>
+      </button>
+    </div>
+
+    <!-- TAB 1: USERS DIRECTORY -->
+    <section id="tab-content-users" class="tab-pane space-y-4">
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
+        <div class="relative flex-1 max-w-md">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+          <input 
+            type="text" 
+            id="user-search-input" 
+            placeholder="Search by name, email or ID..."
+            oninput="renderUsers()"
+            class="w-full pl-9 pr-4 py-1.5 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-600 focus:bg-white text-slate-900 placeholder-slate-400"
+          >
+        </div>
+        <div class="text-xs text-slate-500 font-mono flex items-center gap-2">
+          <span>Active Relation:</span>
+          <span class="bg-slate-100 text-slate-700 font-semibold px-2 py-1 rounded border border-slate-200">USER + USER_PROFILE</span>
+        </div>
+      </div>
+
+      <!-- Users Grid -->
+      <div id="users-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Rendered via JS -->
+      </div>
+    </section>
+
+    <!-- TAB 2: CONTESTS & PROBLEMS -->
+    <section id="tab-content-contests" class="tab-pane hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Contests Section -->
+        <div class="lg:col-span-2 space-y-3">
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-semibold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+              <i data-lucide="calendar" class="w-4 h-4 text-slate-500"></i>
+              Contest Schedule & Mapping
+            </h2>
+            <span class="text-xs font-mono text-slate-500">Foreign Key: platform_id</span>
+          </div>
+          <div id="contests-list" class="space-y-3">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Problems Column -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-semibold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+              <i data-lucide="code" class="w-4 h-4 text-slate-500"></i>
+              Problem Repository
+            </h2>
+            <span class="text-xs font-mono text-slate-500">Table: PROBLEM</span>
+          </div>
+          <div id="problems-list" class="space-y-2.5">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: LEADERBOARD / PARTICIPATES -->
+    <section id="tab-content-leaderboard" class="tab-pane hidden space-y-4">
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
+          <div>
+            <h3 class="text-sm font-semibold text-slate-900">Contest Participation Logs</h3>
+            <p class="text-xs text-slate-500">Junction table `PARTICIPATES` (user_id, contest_id, rank, score)</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <label class="text-xs text-slate-500">Filter Contest:</label>
+            <select id="contest-filter" onchange="renderLeaderboard()" class="text-xs bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 focus:outline-none focus:border-blue-600 font-medium">
+              <option value="ALL">All Contests</option>
+              <option value="101">Codeforces Round 1 (#101)</option>
+              <option value="102">Codeforces Round 2 (#102)</option>
+              <option value="103">LeetCode Weekly Contest (#103)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm text-slate-700">
+            <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-200 font-semibold font-mono">
+              <tr>
+                <th class="px-4 py-3">Rank</th>
+                <th class="px-4 py-3">User (Participant)</th>
+                <th class="px-4 py-3">Contest Name</th>
+                <th class="px-4 py-3">Platform</th>
+                <th class="px-4 py-3 text-right">Points / Score</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-body" class="divide-y divide-slate-100">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: RAW DB SCHEMA & TABLES -->
+    <section id="tab-content-dbviewer" class="tab-pane hidden space-y-4">
+      <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-wrap items-center gap-2">
+        <span class="text-xs font-mono text-slate-400 font-semibold uppercase mr-1">Relations:</span>
+        <button onclick="renderRawTable('USER')" class="raw-tab-btn px-2.5 py-1 rounded text-xs font-mono font-medium bg-blue-600 text-white" data-table="USER">`USER`</button>
+        <button onclick="renderRawTable('PLATFORM')" class="raw-tab-btn px-2.5 py-1 rounded text-xs font-mono font-medium bg-slate-100 text-slate-700 hover:bg-slate-200" data-table="PLATFORM">PLATFORM</button>
+        <button onclick="renderRawTable('CONTEST')" class="raw-tab-btn px-2.5 py-1 rounded text-xs font-mono font-medium bg-slate-100 text-slate-700 hover:bg-slate-200" data-table="CONTEST">CONTEST</button>
+        <button onclick="renderRawTable('PROBLEM')" class="raw-tab-btn px-2.5 py-1 rounded text-xs font-mono font-medium bg-slate-100 text-slate-700 hover:bg-slate-200" data-table="PROBLEM">PROBLEM</button>
+        <button onclick="renderRawTable('USER_PROFILE')" class="raw-tab-btn px-2.5 py-1 rounded text-xs font-mono font-medium bg-slate-100 text-slate-700 hover:bg-slate-200" data-table="USER_PROFILE">USER_PROFILE</button>
+        <button onclick="renderRawTable('PARTICIPATES')" class="raw-tab-btn px-2.5 py-1 rounded text-xs font-mono font-medium bg-slate-100 text-slate-700 hover:bg-slate-200" data-table="PARTICIPATES">PARTICIPATES</button>
+        <button onclick="renderRawTable('INCLUDES')" class="raw-tab-btn px-2.5 py-1 rounded text-xs font-mono font-medium bg-slate-100 text-slate-700 hover:bg-slate-200" data-table="INCLUDES">INCLUDES</button>
+      </div>
+
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50 font-mono text-xs">
+          <div class="text-slate-700 font-semibold flex items-center gap-2">
+            <span class="text-blue-600 font-bold">&gt;</span>
+            <span id="current-table-title">SELECT * FROM `USER`;</span>
+          </div>
+          <span id="current-table-count" class="text-slate-500 font-normal">3 rows</span>
+        </div>
+        
+        <div class="overflow-x-auto">
+          <div id="raw-table-container"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ADD USER MODAL (Clean, standard engineering dialog) -->
+  <div id="add-user-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-[2px] hidden">
+    <div class="bg-white border border-slate-200 w-full max-w-lg rounded-xl shadow-xl overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div>
+          <h3 class="text-base font-semibold text-slate-900">Naya Banda (User) Add Karein</h3>
+          <p class="text-xs text-slate-500 mt-0.5">Inserts into `USER`, `USER_PROFILE` & optional participation.</p>
+        </div>
+        <button onclick="closeAddUserModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-md transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Form Body -->
+      <form id="add-user-form" onsubmit="handleCreateUser(event)" class="p-5 space-y-4">
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">User ID</label>
+            <input 
+              type="number" 
+              id="new-user-id" 
+              required
+              class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 font-mono focus:bg-white focus:outline-none focus:border-blue-600"
+            >
+          </div>
+          <div class="col-span-2">
+            <label class="block text-xs font-medium text-slate-700 mb-1">Full Name</label>
+            <input 
+              type="text" 
+              id="new-user-name" 
+              placeholder="e.g. Sanchit Girhe" 
+              required
+              class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 focus:bg-white focus:outline-none focus:border-blue-600 placeholder-slate-400"
+            >
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1">Email Address</label>
+          <input 
+            type="email" 
+            id="new-user-email" 
+            placeholder="e.g. sanchit@example.com" 
+            required
+            class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 focus:bg-white focus:outline-none focus:border-blue-600 placeholder-slate-400"
+          >
+        </div>
+
+        <!-- Profiles (Multivalued attributes) -->
+        <div class="pt-2 border-t border-slate-100">
+          <label class="block text-xs font-medium text-slate-700 mb-2">Platform Profiles (USER_PROFILE)</label>
+          <div class="space-y-2">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-mono px-2 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200 font-semibold w-12 text-center">CF</span>
+              <input 
+                type="url" 
+                id="new-user-cf" 
+                placeholder="https://codeforces.com/profile/username" 
+                class="flex-1 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-blue-600 placeholder-slate-400"
+              >
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-mono px-2 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200 font-semibold w-12 text-center">LC</span>
+              <input 
+                type="url" 
+                id="new-user-lc" 
+                placeholder="https://leetcode.com/u/username" 
+                class="flex-1 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-blue-600 placeholder-slate-400"
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Optional Participation -->
+        <div class="pt-2 border-t border-slate-100">
+          <label class="block text-xs font-medium text-slate-700 mb-1.5">Initial Participation (Optional):</label>
+          <div class="grid grid-cols-3 gap-2">
+            <select id="new-user-contest" class="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-slate-700 focus:outline-none focus:border-blue-600">
+              <option value="">No Contest</option>
+              <option value="101">CF Round 1 (#101)</option>
+              <option value="102">CF Round 2 (#102)</option>
+              <option value="103">LeetCode W. (#103)</option>
+            </select>
+            <input 
+              type="number" 
+              id="new-user-rank" 
+              placeholder="Rank (e.g. 12)" 
+              class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-blue-600 font-mono"
+            >
+            <input 
+              type="number" 
+              id="new-user-score" 
+              placeholder="Score (e.g. 850)" 
+              class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-blue-600 font-mono"
+            >
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100">
+          <button type="button" onclick="closeAddUserModal()" class="px-3.5 py-2 text-xs font-medium text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-lg transition">
+            Cancel
+          </button>
+          <button type="submit" class="px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition shadow-sm flex items-center gap-1.5">
+            <i data-lucide="check" class="w-3.5 h-3.5"></i>
+            Save Record
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-200 pointer-events-none flex items-center gap-2 bg-slate-900 text-white text-xs px-3.5 py-2.5 rounded-lg shadow-lg">
+    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toast-msg">Database updated successfully</span>
+  </div>
+
+  <!-- JavaScript State & DOM Logic -->
+  <script>
+    const DEFAULT_DATA = {
+      PLATFORM: [
+        { platform_id: 1, platform_name: 'Codeforces', website_url: 'https://codeforces.com' },
+        { platform_id: 2, platform_name: 'LeetCode', website_url: 'https://leetcode.com' },
+        { platform_id: 3, platform_name: 'AtCoder', website_url: 'https://atcoder.jp' }
+      ],
+      USER: [
+        { user_id: 1, name: 'Siddharth', email: 'siddharth@example.com' },
+        { user_id: 2, name: 'Rahul', email: 'rahul@example.com' },
+        { user_id: 3, name: 'Aman', email: 'aman@example.com' }
+      ],
+      CONTEST: [
+        { contest_id: 101, contest_name: 'Codeforces Round 1', contest_date: '2026-09-01', contest_start: '18:00:00', duration: 120, platform_id: 1 },
+        { contest_id: 102, contest_name: 'Codeforces Round 2', contest_date: '2026-09-05', contest_start: '20:00:00', duration: 150, platform_id: 1 },
+        { contest_id: 103, contest_name: 'LeetCode Weekly Contest', contest_date: '2026-09-07', contest_start: '10:00:00', duration: 90, platform_id: 2 }
+      ],
+      PROBLEM: [
+        { problem_id: 201, problem_name: 'Two Sum', difficulty_score: 3, platform_id: 2 },
+        { problem_id: 202, problem_name: 'Binary Search', difficulty_score: 5, platform_id: 1 },
+        { problem_id: 203, problem_name: 'Graph Traversal', difficulty_score: 8, platform_id: 1 },
+        { problem_id: 204, problem_name: 'Dynamic Programming', difficulty_score: 9, platform_id: 1 }
+      ],
+      USER_PROFILE: [
+        { user_id: 1, profile_link: 'https://codeforces.com/profile/siddharth' },
+        { user_id: 1, profile_link: 'https://leetcode.com/u/siddharth' },
+        { user_id: 2, profile_link: 'https://codeforces.com/profile/rahul' },
+        { user_id: 3, profile_link: 'https://leetcode.com/u/aman' }
+      ],
+      PARTICIPATES: [
+        { user_id: 1, contest_id: 101, rank: 25, score: 850 },
+        { user_id: 2, contest_id: 101, rank: 42, score: 720 },
+        { user_id: 1, contest_id: 102, rank: 18, score: 910 },
+        { user_id: 3, contest_id: 103, rank: 15, score: 880 }
+      ],
+      INCLUDES: [
+        { contest_id: 101, problem_id: 202 },
+        { contest_id: 101, problem_id: 203 },
+        { contest_id: 102, problem_id: 203 },
+        { contest_id: 102, problem_id: 204 },
+        { contest_id: 103, problem_id: 201 }
+      ]
+    };
+
+    let state = {};
+
+    function loadState() {
+      const stored = localStorage.getItem('codekeep_db_state_v2');
+      if (stored) {
+        try {
+          state = JSON.parse(stored);
+        } catch (e) {
+          state = JSON.parse(JSON.stringify(DEFAULT_DATA));
+        }
+      } else {
+        state = JSON.parse(JSON.stringify(DEFAULT_DATA));
+        saveState();
+      }
+      updateStats();
+    }
+
+    function saveState() {
+      localStorage.setItem('codekeep_db_state_v2', JSON.stringify(state));
+      updateStats();
+    }
+
+    function resetToSqlDefaults() {
+      if (confirm('Database state ko reset karke original SQL script rows pe lana hai?')) {
+        state = JSON.parse(JSON.stringify(DEFAULT_DATA));
+        saveState();
+        renderAllViews();
+        showToast('Reset to original SQL snapshot');
+      }
+    }
+
+    function updateStats() {
+      document.getElementById('stat-user-count').textContent = state.USER.length;
+      document.getElementById('stat-contest-count').textContent = state.CONTEST.length;
+      document.getElementById('stat-problem-count').textContent = state.PROBLEM.length;
+      document.getElementById('stat-part-count').textContent = state.PARTICIPATES.length;
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-msg');
+      toastMsg.textContent = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+      }, 2500);
+    }
+
+    function openAddUserModal() {
+      const modal = document.getElementById('add-user-modal');
+      const idInput = document.getElementById('new-user-id');
+      const maxId = state.USER.reduce((acc, u) => Math.max(acc, Number(u.user_id)), 0);
+      document.getElementById('add-user-form').reset();
+      idInput.value = maxId + 1;
+      modal.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeAddUserModal() {
+      document.getElementById('add-user-modal').classList.add('hidden');
+    }
+
+    function handleCreateUser(e) {
+      e.preventDefault();
+      const userId = parseInt(document.getElementById('new-user-id').value);
+      const name = document.getElementById('new-user-name').value.trim();
+      const email = document.getElementById('new-user-email').value.trim();
+      const cfLink = document.getElementById('new-user-cf').value.trim();
+      const lcLink = document.getElementById('new-user-lc').value.trim();
+      const contestId = document.getElementById('new-user-contest').value;
+      const rank = document.getElementById('new-user-rank').value;
+      const score = document.getElementById('new-user-score').value;
+
+      if (state.USER.some(u => Number(u.user_id) === userId)) {
+        alert('User with ID ' + userId + ' already exists!');
+        return;
+      }
+
+      state.USER.push({ user_id: userId, name: name, email: email });
+
+      if (cfLink) state.USER_PROFILE.push({ user_id: userId, profile_link: cfLink });
+      if (lcLink) state.USER_PROFILE.push({ user_id: userId, profile_link: lcLink });
+
+      if (contestId && (rank || score)) {
+        state.PARTICIPATES.push({
+          user_id: userId,
+          contest_id: parseInt(contestId),
+          rank: rank ? parseInt(rank) : null,
+          score: score ? parseInt(score) : null
+        });
+      }
+
+      saveState();
+      closeAddUserModal();
+      renderAllViews();
+      showToast(`User ${name} added successfully!`);
+    }
+
+    function renderUsers() {
+      const container = document.getElementById('users-grid');
+      const searchQuery = (document.getElementById('user-search-input')?.value || '').toLowerCase();
+      
+      const filtered = state.USER.filter(u => {
+        return u.name.toLowerCase().includes(searchQuery) || 
+               u.email.toLowerCase().includes(searchQuery) ||
+               String(u.user_id).includes(searchQuery);
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full py-12 text-center text-slate-400 bg-white border border-slate-200 rounded-xl">
+            <i data-lucide="user-x" class="w-8 h-8 mx-auto mb-2 text-slate-300"></i>
+            <p class="text-sm">No matching user records found.</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = filtered.map(user => {
+        const profiles = state.USER_PROFILE.filter(p => Number(p.user_id) === Number(user.user_id));
+        const userContests = state.PARTICIPATES.filter(p => Number(p.user_id) === Number(user.user_id));
+        const totalScore = userContests.reduce((sum, item) => sum + (item.score || 0), 0);
+        const bestRank = userContests.length > 0 
+          ? Math.min(...userContests.map(c => c.rank || 9999)) 
+          : '-';
+
+        return `
+          <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:border-slate-300 transition flex flex-col justify-between">
+            <div>
+              <div class="flex items-start justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="h-10 w-10 rounded-lg bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center font-bold text-sm">
+                    ${user.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <h4 class="font-semibold text-slate-900 text-sm leading-tight">${user.name}</h4>
+                    <span class="text-xs text-slate-500 font-mono">${user.email}</span>
+                  </div>
+                </div>
+                <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-medium">
+                  #${user.user_id}
+                </span>
+              </div>
+
+              <!-- Metrics -->
+              <div class="grid grid-cols-2 gap-2 mt-4 py-2 px-3 bg-slate-50 rounded-lg border border-slate-100 text-xs">
+                <div>
+                  <span class="text-slate-400 text-[10px] uppercase font-medium">Points</span>
+                  <div class="font-bold text-slate-800 font-mono">${totalScore} pts</div>
+                </div>
+                <div>
+                  <span class="text-slate-400 text-[10px] uppercase font-medium">Best Rank</span>
+                  <div class="font-bold text-blue-600 font-mono">${bestRank === '-' || bestRank === 9999 ? 'N/A' : '#' + bestRank}</div>
+                </div>
+              </div>
+
+              <!-- Profile links -->
+              <div class="mt-3">
+                <span class="text-[10px] text-slate-400 uppercase font-semibold block mb-1.5">Profile Links</span>
+                <div class="flex flex-wrap gap-1.5">
+                  ${profiles.length > 0 ? profiles.map(p => {
+                    const isCf = p.profile_link.includes('codeforces');
+                    const isLc = p.profile_link.includes('leetcode');
+                    return `
+                      <a href="${p.profile_link}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition">
+                        <span>${isCf ? 'Codeforces' : isLc ? 'LeetCode' : 'Profile'}</span>
+                        <i data-lucide="external-link" class="w-3 h-3 text-slate-400"></i>
+                      </a>
+                    `;
+                  }).join('') : '<span class="text-xs text-slate-400 italic">No external links attached</span>'}
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer Delete Option -->
+            <div class="pt-3 mt-4 border-t border-slate-100 flex items-center justify-between text-xs">
+              <span class="text-slate-400 text-[11px] font-mono">Row stored in USER</span>
+              <button onclick="deleteUser(${user.user_id})" class="text-slate-400 hover:text-red-600 transition flex items-center gap-1">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                Delete
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function deleteUser(userId) {
+      if (!confirm(`Are you sure you want to remove user ID ${userId}?`)) return;
+      state.USER = state.USER.filter(u => Number(u.user_id) !== Number(userId));
+      state.USER_PROFILE = state.USER_PROFILE.filter(p => Number(p.user_id) !== Number(userId));
+      state.PARTICIPATES = state.PARTICIPATES.filter(p => Number(p.user_id) !== Number(userId));
+      saveState();
+      renderAllViews();
+      showToast('User record removed');
+    }
+
+    function renderContests() {
+      const container = document.getElementById('contests-list');
+      container.innerHTML = state.CONTEST.map(contest => {
+        const platform = state.PLATFORM.find(p => Number(p.platform_id) === Number(contest.platform_id)) || { platform_name: 'Unknown' };
+        const problemIds = state.INCLUDES
+          .filter(inc => Number(inc.contest_id) === Number(contest.contest_id))
+          .map(inc => inc.problem_id);
+        const problems = state.PROBLEM.filter(prob => problemIds.includes(prob.problem_id));
+
+        return `
+          <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
+              <div class="flex items-center gap-2.5">
+                <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">#${contest.contest_id}</span>
+                <h3 class="font-bold text-slate-900 text-sm">${contest.contest_name}</h3>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100 font-medium">
+                  ${platform.platform_name}
+                </span>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-4 text-xs text-slate-500 font-mono py-2">
+              <span>Date: ${contest.contest_date}</span>
+              <span>Start: ${contest.contest_start}</span>
+              <span>Duration: ${contest.duration}m</span>
+            </div>
+
+            <div class="mt-2 pt-2 border-t border-slate-50">
+              <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">Includes Problems:</span>
+              <div class="flex flex-wrap gap-2">
+                ${problems.length > 0 ? problems.map(p => `
+                  <div class="px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 text-xs flex items-center gap-2">
+                    <span class="font-mono text-slate-500">#${p.problem_id}</span>
+                    <span class="font-medium text-slate-800">${p.problem_name}</span>
+                    <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-600">
+                      Score: ${p.difficulty_score}
+                    </span>
+                  </div>
+                `).join('') : '<span class="text-xs text-slate-400">No problems mapped</span>'}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const probContainer = document.getElementById('problems-list');
+      probContainer.innerHTML = state.PROBLEM.map(prob => {
+        const plat = state.PLATFORM.find(p => Number(p.platform_id) === Number(prob.platform_id));
+        return `
+          <div class="p-3 bg-white rounded-lg border border-slate-200 flex items-center justify-between shadow-sm">
+            <div>
+              <div class="text-[10px] font-mono text-slate-400">ID: ${prob.problem_id}</div>
+              <div class="text-sm font-semibold text-slate-800">${prob.problem_name}</div>
+              <div class="text-xs text-slate-500">${plat ? plat.platform_name : 'Platform'}</div>
+            </div>
+            <div class="text-right">
+              <span class="text-xs font-mono font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+                Diff: ${prob.difficulty_score}/10
+              </span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function renderLeaderboard() {
+      const tbody = document.getElementById('leaderboard-body');
+      const filter = document.getElementById('contest-filter').value;
+      
+      let list = state.PARTICIPATES.map(p => {
+        const user = state.USER.find(u => Number(u.user_id) === Number(p.user_id)) || { name: 'Unknown (' + p.user_id + ')' };
+        const contest = state.CONTEST.find(c => Number(c.contest_id) === Number(p.contest_id)) || { contest_name: 'Unknown Contest' };
+        const platform = contest.platform_id ? state.PLATFORM.find(pl => Number(pl.platform_id) === Number(contest.platform_id)) : null;
+        return {
+          ...p,
+          userName: user.name,
+          contestName: contest.contest_name,
+          platformName: platform ? platform.platform_name : '-'
+        };
+      });
+
+      if (filter !== 'ALL') {
+        list = list.filter(item => Number(item.contest_id) === Number(filter));
+      }
+
+      list.sort((a, b) => (a.rank || 9999) - (b.rank || 9999));
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-400 text-xs">No entries match the filter criteria.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(item => `
+        <tr class="hover:bg-slate-50 transition">
+          <td class="px-4 py-3 font-mono">
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold ${item.rank === 1 ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700'}">
+              #${item.rank || 'N/A'}
+            </span>
+          </td>
+          <td class="px-4 py-3 font-medium text-slate-900">${item.userName}</td>
+          <td class="px-4 py-3 text-slate-600 text-xs font-mono">${item.contestName}</td>
+          <td class="px-4 py-3">
+            <span class="text-xs px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">${item.platformName}</span>
+          </td>
+          <td class="px-4 py-3 text-right font-mono font-bold text-slate-900">${item.score || 0}</td>
+        </tr>
+      `).join('');
+    }
+
+    let activeTable = 'USER';
+    function renderRawTable(tableName) {
+      activeTable = tableName;
+      
+      document.querySelectorAll('.raw-tab-btn').forEach(btn => {
+        if (btn.getAttribute('data-table') === tableName) {
+          btn.className = 'raw-tab-btn px-2.5 py-1 rounded text-xs font-mono font-medium bg-blue-600 text-white';
+        } else {
+          btn.className = 'raw-tab-btn px-2.5 py-1 rounded text-xs font-mono font-medium bg-slate-100 text-slate-700 hover:bg-slate-200';
+        }
+      });
+
+      document.getElementById('current-table-title').textContent = `SELECT * FROM \`${tableName}\`;`;
+      const data = state[tableName] || [];
+      document.getElementById('current-table-count').textContent = `${data.length} records`;
+
+      const container = document.getElementById('raw-table-container');
+      if (data.length === 0) {
+        container.innerHTML = `<div class="py-6 text-center text-slate-400 font-mono text-xs">Table is currently empty.</div>`;
+        return;
+      }
+
+      const columns = Object.keys(data[0]);
+      let html = `
+        <table class="w-full text-left font-mono text-xs border-collapse">
+          <thead class="bg-slate-100 text-slate-600 border-b border-slate-200 uppercase font-semibold">
+            <tr>
+              ${columns.map(col => `<th class="px-3 py-2 border-r border-slate-200 last:border-r-0">${col}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            ${data.map(row => `
+              <tr class="hover:bg-slate-50">
+                ${columns.map(col => `
+                  <td class="px-3 py-2 border-r border-slate-100 last:border-r-0 text-slate-800 whitespace-nowrap">
+                    ${row[col] !== null ? row[col] : '<span class="text-slate-400">NULL</span>'}
+                  </td>
+                `).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+      container.innerHTML = html;
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('border-blue-600', 'text-blue-600');
+        btn.classList.add('border-transparent', 'text-slate-500');
+      });
+
+      const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('border-transparent', 'text-slate-500');
+        activeBtn.classList.add('border-blue-600', 'text-blue-600');
+      }
+
+      const activePane = document.getElementById(`tab-content-${tabId}`);
+      if (activePane) activePane.classList.remove('hidden');
+
+      if (tabId === 'dbviewer') renderRawTable(activeTable);
+    }
+
+    function renderAllViews() {
+      renderUsers();
+      renderContests();
+      renderLeaderboard();
+      renderRawTable(activeTable);
+      lucide.createIcons();
+    }
+
+    window.onload = function() {
+      loadState();
+      renderAllViews();
+    };
+  </script>
+</body>
+</html>
